@@ -1,7 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 
-Route::get('/', function () {
-    return view('welcome');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Rutas de autenticación
+Route::get('/', [AuthController::class, 'showLoginForm'])->name('home');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Ruta para crear usuario (solo desarrollo)
+Route::get('/create-user', [AuthController::class, 'createUser']);
+
+// Rutas protegidas que requieren autenticación
+Route::middleware(['auth'])->group(function () {
+    // Dashboard principal
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
 });
