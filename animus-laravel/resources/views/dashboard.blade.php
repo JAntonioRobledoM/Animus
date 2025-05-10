@@ -115,7 +115,7 @@
                                             Editar
                                         </a>
                                     </div>
-                                    <a href="{{ $recuerdo->path }}" onclick="executeGame('{{ $recuerdo->path }}'); return false;" class="bg-abstergo-blue px-4 py-2 text-sm rounded hover:bg-abstergo-light-blue transition-colors flex items-center">
+                                    <a href="#" class="bg-abstergo-blue px-4 py-2 text-sm rounded hover:bg-abstergo-light-blue transition-colors flex items-center launch-game" data-path="{{ $recuerdo->path }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -144,54 +144,122 @@
         <p class="mt-1">SISTEMA DE RECUPERACIÓN DE MEMORIAS GENÉTICAS</p>
     </footer>
 
+    <!-- Modal de sincronización -->
+    <div id="sync-modal" class="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 hidden">
+        <div class="text-abstergo-blue text-4xl mb-4 font-semibold">INICIANDO SINCRONIZACIÓN</div>
+        <div class="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-abstergo-blue" style="width: 0%"></div>
+        </div>
+        <div id="loading-text" class="mt-4 text-white">Preparando secuencia genética...</div>
+    </div>
+
     <script>
-    function executeGame(path) {
-        // Mostrar animación de carga/sincronización
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.className = 'fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50';
-        loadingOverlay.innerHTML = `
-            <div class="text-abstergo-blue text-4xl mb-4 font-semibold">INICIANDO SINCRONIZACIÓN</div>
-            <div class="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
-                <div id="progress-bar" class="h-full bg-abstergo-blue" style="width: 0%"></div>
-            </div>
-            <div id="loading-text" class="mt-4 text-white">Preparando secuencia genética...</div>
-        `;
-        document.body.appendChild(loadingOverlay);
-        
-        // Simular progreso
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 5;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            
-            if (progress === 30) {
-                document.getElementById('loading-text').textContent = 'Analizando datos de ADN...';
-            } else if (progress === 60) {
-                document.getElementById('loading-text').textContent = 'Inicializando entorno virtual...';
-            } else if (progress === 90) {
-                document.getElementById('loading-text').textContent = 'Abriendo aplicación externa...';
+        // Función para detectar si estamos en Electron
+        function isElectron() {
+            return window.electron && window.electron.getVersion;
+        }
+
+        // Función para lanzar juegos
+        async function launchGame(path) {
+            if (!path) {
+                console.error('Ruta de juego no válida');
+                return;
             }
             
-            if (progress >= 100) {
-                clearInterval(interval);
+            console.log('Intentando lanzar juego:', path);
+            
+            // Mostrar modal de sincronización
+            const syncModal = document.getElementById('sync-modal');
+            const progressBar = document.getElementById('progress-bar');
+            const loadingText = document.getElementById('loading-text');
+            
+            syncModal.classList.remove('hidden');
+            
+            // Simular progreso
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
                 
-                // Intento abrir la aplicación y luego elimino el overlay
-                setTimeout(() => {
-                    try {
-                        // En un entorno web tradicional, no podemos ejecutar archivos directamente por seguridad,
-                        // pero podemos intentar iniciar la URL para que el sistema operativo la maneje
-                        window.location.href = path;
-                    } catch (error) {
-                        console.error("Error al intentar abrir el juego:", error);
-                        alert("No se pudo iniciar el juego. Verifique la ruta del ejecutable.");
+                if (progress === 30) {
+                    loadingText.textContent = 'Analizando datos de ADN...';
+                } else if (progress === 60) {
+                    loadingText.textContent = 'Inicializando entorno virtual...';
+                } else if (progress === 90) {
+                    loadingText.textContent = 'Abriendo aplicación externa...';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    
+                    // Intento abrir la aplicación 
+                    setTimeout(async () => {
+                        try {
+                            // Verificar si estamos en Electron
+                            if (isElectron()) {
+                                // Usar la API de Electron
+                                console.log('Usando API de Electron para lanzar:', path);
+                                await window.electron.launchGame(path);
+                            } else {
+                                // Fallback para navegador web (abrirá error de seguridad)
+                                console.log('Usando navegador para intentar abrir:', path);
+                                window.location.href = path;
+                            }
+                        } catch (error) {
+                            console.error("Error al intentar abrir el juego:", error);
+                            loadingText.textContent = "Error al abrir el juego. Verifica la ruta.";
+                            progressBar.style.backgroundColor = "#ff3333";
+                            
+                            // Mantener el modal visible por 3 segundos más en caso de error
+                            setTimeout(() => {
+                                syncModal.classList.add('hidden');
+                                progressBar.style.width = '0%';
+                                progressBar.style.backgroundColor = "#0082CA";
+                                loadingText.textContent = 'Preparando secuencia genética...';
+                            }, 3000);
+                            return;
+                        }
+                        
+                        // Ocultamos el modal después de iniciar la app
+                        setTimeout(() => {
+                            syncModal.classList.add('hidden');
+                            progressBar.style.width = '0%';
+                            loadingText.textContent = 'Preparando secuencia genética...';
+                        }, 1000);
+                    }, 500);
+                }
+            }, 50);
+        }
+
+        // Configurar todos los botones de sincronización cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Seleccionar todos los botones de sincronización
+            const syncButtons = document.querySelectorAll('.launch-game');
+            
+            syncButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Obtener la ruta del juego del atributo data-path
+                    const gamePath = this.dataset.path;
+                    
+                    if (gamePath) {
+                        launchGame(gamePath);
+                    } else {
+                        console.warn('Ruta de juego no válida o no encontrada');
                     }
                     
-                    // Eliminamos el overlay después de intentar abrir la aplicación
-                    document.body.removeChild(loadingOverlay);
-                }, 500);
+                    return false;
+                });
+            });
+            
+            // Mensaje de depuración para confirmar funcionamiento
+            if (isElectron()) {
+                console.log('Electron detectado, versión:', window.electron.getVersion());
+            } else {
+                console.log('Electron no detectado, ejecutando en navegador normal');
             }
-        }, 50);
-    }
-</script>
+        });
+    </script>
 </body>
 </html>

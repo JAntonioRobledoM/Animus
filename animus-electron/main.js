@@ -1,0 +1,128 @@
+const { app, BrowserWindow, shell, ipcMain } = require('electron');
+const path = require('path');
+const isDev = require('electron-is-dev');
+const { exec } = require('child_process');
+
+// Mantener referencia global del objeto window
+let mainWindow;
+let laravelProcess;
+
+function createWindow() {
+  // Crear la ventana del navegador
+  mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    icon: path.join(__dirname, 'assets/icons/icon.png')
+  });
+
+  // Cargar la URL de la aplicación Laravel
+  mainWindow.loadURL(isDev ? 'http://localhost:8000' : 'http://localhost:8000');
+
+  // Abrir DevTools automáticamente si estamos en desarrollo
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
+
+  // Gestionar ventanas emergentes y enlaces externos
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    // Si la URL comienza con file://, abrir con shell
+    if (url.startsWith('file://')) {
+      shell.openPath(url.replace('file://', ''));
+      return { action: 'deny' };
+    }
+    // Dejar que Electron maneje otros enlaces
+    return { action: 'allow' };
+  });
+
+  // Cuando la ventana se cierre
+  mainWindow.on('closed', function () {
+    mainWindow = null;
+  });
+}
+
+// Iniciar el servidor Laravel antes de crear la ventana
+function startLaravel() {
+  // Ruta al proyecto Laravel (ajusta según tu estructura)
+  const laravelPath = path.join(__dirname, '..', 'animus-laravel');
+  
+  console.log('Iniciando servidor Laravel en:', laravelPath);
+  
+  laravelProcess = exec('php artisan serve', { cwd: laravelPath });
+  
+  laravelProcess.stdout.on('data', (data) => {
+    console.log(`Laravel: ${data}`);
+  });
+  
+  laravelProcess.stderr.on('data', (data) => {
+    console.error(`Laravel Error: ${data}`);
+  });
+  
+  // Esperar un momento para que Laravel inicie antes de abrir la ventana
+  setTimeout(createWindow, 2000);
+}
+
+// Cuando Electron está listo
+app.on('ready', startLaravel);
+
+// Salir cuando todas las ventanas estén cerradas
+app.on('window-all-closed', function () {
+  // En macOS es común que las aplicaciones y su barra de menú
+  // permanezcan activas hasta que el usuario salga explícitamente con Cmd + Q
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+  
+  // Matar el proceso de Laravel al cerrar la aplicación
+  if (laravelProcess) {
+    laravelProcess.kill();
+  }
+});
+
+app.on('activate', function () {
+  if (mainWindow === null) {
+    createWindow();
+  }
+});
+
+// Gestionar el cierre de la aplicación
+app.on('before-quit', () => {
+  if (laravelProcess) {
+    laravelProcess.kill();
+  }
+});
+
+// Manejar eventos IPC (comunicación entre procesos)
+ipcMain.handle('launch-game', async (event, gamePath) => {
+  console.log('Main process: Intentando lanzar juego:', gamePath);
+  
+  return new Promise((resolve, reject) => {
+    try {
+      // Ejecutar el juego
+      const child = exec(`"${gamePath}"`, (error) => {
+        if (error) {
+          console.error('Error al lanzar el juego:', error);
+          reject(error);
+        }
+      });
+      
+      // Consideramos que se lanzó correctamente cuando el proceso comienza
+      child.on('spawn', () => {
+        console.log('Juego lanzado correctamente');
+        resolve(true);
+      });
+      
+      // También manejar el caso en que el proceso termine
+      child.on('exit', (code) => {
+        console.log(`Juego cerrado con código: ${code}`);
+      });
+    } catch (error) {
+      console.error('Error al intentar lanzar el juego:', error);
+      reject(error);
+    }
+  });
+});
