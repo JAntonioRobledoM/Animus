@@ -1,4 +1,5 @@
 <?php
+// Ruta: routes/web.php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -11,11 +12,11 @@ use App\Http\Controllers\DashboardController;
 */
 
 // Rutas de autenticación
-Route::get('/', [AuthController::class, 'showLoginForm'])->name('home');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Ruta para crear usuario (solo desarrollo)
+// Ruta para crear usuario (solo desarrollo - deberías eliminarla en producción)
 Route::get('/create-user', [AuthController::class, 'createUser']);
 
 // Rutas protegidas que requieren autenticación

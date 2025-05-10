@@ -4,6 +4,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -11,15 +12,18 @@ use App\Models\User;
 class AuthController extends Controller
 {
     /**
+     * Constructor para aplicar middleware
+     */
+    public function __construct()
+    {
+        $this->middleware('guest')->except(['logout']);
+    }
+    
+    /**
      * Muestra la vista de login.
      */
     public function showLoginForm()
     {
-        // Si el usuario ya está autenticado, redirigir al dashboard
-        if (Auth::check()) {
-            return redirect()->route('dashboard');
-        }
-        
         return view('welcome');
     }
     
@@ -52,7 +56,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect('/');
+        return redirect()->route('login');
     }
     
     /**

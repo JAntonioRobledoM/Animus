@@ -22,21 +22,18 @@ class UserSeeder extends Seeder
 
         // Puedes agregar más usuarios de prueba
         User::create([
-            'name' => 'operador',
-            'password' => Hash::make('operador'),
+            'name' => 'sujeto-2025',
+            'password' => Hash::make('1243'),
         ]);
 
         User::create([
-            'name' => 'sujeto16',
-            'password' => Hash::make('animus'),
+            'name' => 'sujeto-16',
+            'password' => Hash::make('gris'),
         ]);
 
         User::create([
-            'name' => 'desmond',
+            'name' => 'sujeto-17',
             'password' => Hash::make('miles'),
         ]);
-
-        // Si quieres generar usuarios aleatorios, puedes usar:
-        // \App\Models\User::factory(10)->create();
     }
 }
