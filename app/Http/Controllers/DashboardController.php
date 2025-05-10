@@ -1,14 +1,14 @@
 <?php
-// Ruta: app/Http/Controllers/DashboardController.php
 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Recuerdo;
 
-use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Routing\Controller;
 
-class DashboardController extends BaseController
+class DashboardController extends Controller
 {
     /**
      * Constructor con middleware de autenticación
@@ -19,11 +19,12 @@ class DashboardController extends BaseController
     }
     
     /**
-     * Muestra el dashboard principal del Animus
+     * Muestra el dashboard principal del Animus con los recuerdos del usuario actual
      */
     public function index()
     {
-        $recuerdos = Recuerdo::orderBy('position', 'asc')->get();
+        // Obtener solo los recuerdos del usuario autenticado
+        $recuerdos = Auth::user()->recuerdos()->orderBy('position', 'asc')->get();
         
         return view('dashboard', [
             'recuerdos' => $recuerdos

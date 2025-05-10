@@ -97,7 +97,7 @@
                 <h1 class="text-4xl font-semibold tracking-widest text-white">
                     ANIMUS <span class="text-xl align-super">OS</span>
                 </h1>
-                <div class="absolute right-5 top-1 text-sm opacity-70">v4.27</div>
+                <div class="absolute right-5 top-1 text-sm opacity-70">v0.3</div>
             </div>
             
             <!-- Mensaje de error -->
@@ -108,7 +108,7 @@
             @endif
             
             <!-- Formulario de login -->
-            <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('login.submit') }}">
                 @csrf
                 <div class="mb-6">
                     <label for="name" class="block mb-2 text-sm text-abstergo-light-blue tracking-wider">ID DE SUJETO</label>

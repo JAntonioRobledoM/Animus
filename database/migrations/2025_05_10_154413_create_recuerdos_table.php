@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('recuerdos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('img')->nullable(); // Ruta a la imagen del recuerdo
             $table->string('title'); // Título del recuerdo
             $table->string('subtitle')->nullable(); // Subtítulo del recuerdo

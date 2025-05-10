@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -38,4 +39,12 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
     ];
+    
+    /**
+     * Obtiene los recuerdos que pertenecen a este usuario.
+     */
+    public function recuerdos(): HasMany
+    {
+        return $this->hasMany(Recuerdo::class);
+    }
 }
