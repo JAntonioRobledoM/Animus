@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, ipcMain, session } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
 const { exec } = require('child_process');
@@ -15,13 +15,44 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      webSecurity: false,  // Desactivar seguridad web para permitir CORS
+      allowRunningInsecureContent: true,  // Permitir contenido inseguro
       preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, 'assets/icons/icon.png')
   });
 
+  // Configurar headers de CORS para todas las solicitudes
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['Origin'] = 'http://localhost:8000';
+    details.requestHeaders['Access-Control-Allow-Origin'] = '*';
+    callback({ cancel: false, requestHeaders: details.requestHeaders });
+  });
+
+  // Configurar política de seguridad de contenido
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Access-Control-Allow-Origin': ['*'],
+        'Content-Security-Policy': ['default-src * self blob: data: gap:; style-src * self blob: data: gap:; script-src * self blob: data: gap:; object-src * self blob: data: gap:; img-src * self blob: data: gap:; connect-src self * data: blob:; frame-src *;'],
+      }
+    });
+  });
+
   // Cargar la URL de la aplicación Laravel
   mainWindow.loadURL(isDev ? 'http://localhost:8000' : 'http://localhost:8000');
+
+  // Manejar errores de carga
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Error al cargar la página:', errorCode, errorDescription);
+    
+    // Reintento automático después de un breve retraso
+    setTimeout(() => {
+      console.log('Reintentando cargar la página...');
+      mainWindow.loadURL(isDev ? 'http://localhost:8000' : 'http://localhost:8000');
+    }, 3000);
+  });
 
   // Abrir DevTools automáticamente si estamos en desarrollo
   if (isDev) {
@@ -45,25 +76,68 @@ function createWindow() {
   });
 }
 
+// Verificar si Laravel ya está ejecutándose
+function checkLaravelRunning(port = 8000) {
+  return new Promise((resolve) => {
+    const client = require('net').connect({port, host: 'localhost'}, () => {
+      // Laravel está ejecutándose
+      client.end();
+      resolve(true);
+    });
+    
+    client.on('error', () => {
+      // Laravel no está ejecutándose
+      resolve(false);
+    });
+  });
+}
+
 // Iniciar el servidor Laravel antes de crear la ventana
-function startLaravel() {
+async function startLaravel() {
+  // Verificar si Laravel ya está ejecutándose
+  const isRunning = await checkLaravelRunning();
+  
+  if (isRunning) {
+    console.log('Laravel ya está ejecutándose en el puerto 8000');
+    createWindow();
+    return;
+  }
+  
   // Ruta al proyecto Laravel (ajusta según tu estructura)
   const laravelPath = path.join(__dirname, '..', 'animus-laravel');
   
   console.log('Iniciando servidor Laravel en:', laravelPath);
   
-  laravelProcess = exec('php artisan serve', { cwd: laravelPath });
-  
-  laravelProcess.stdout.on('data', (data) => {
-    console.log(`Laravel: ${data}`);
-  });
-  
-  laravelProcess.stderr.on('data', (data) => {
-    console.error(`Laravel Error: ${data}`);
-  });
-  
-  // Esperar un momento para que Laravel inicie antes de abrir la ventana
-  setTimeout(createWindow, 2000);
+  try {
+    laravelProcess = exec('php artisan serve', { cwd: laravelPath });
+    
+    laravelProcess.stdout.on('data', (data) => {
+      console.log(`Laravel: ${data}`);
+      
+      // Si detectamos que Laravel ha iniciado correctamente
+      if (data.includes('Development Server')) {
+        console.log('Laravel iniciado correctamente');
+        setTimeout(createWindow, 1000);
+      }
+    });
+    
+    laravelProcess.stderr.on('data', (data) => {
+      console.error(`Laravel Error: ${data}`);
+    });
+    
+    // Si después de un tiempo no hemos detectado el mensaje de éxito,
+    // intentamos crear la ventana de todos modos
+    setTimeout(() => {
+      if (!mainWindow) {
+        console.log('Creando ventana después del tiempo de espera');
+        createWindow();
+      }
+    }, 5000);
+  } catch (error) {
+    console.error('Error al iniciar Laravel:', error);
+    // Crear la ventana de todos modos, tal vez Laravel ya esté ejecutándose
+    createWindow();
+  }
 }
 
 // Cuando Electron está listo
