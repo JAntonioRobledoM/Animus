@@ -29,16 +29,16 @@ function createWindow() {
     callback({ cancel: false, requestHeaders: details.requestHeaders });
   });
 
-  // Configurar política de seguridad de contenido
+  // Configurar política de seguridad de contenido para permitir estilos y scripts inline
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Access-Control-Allow-Origin': ['*'],
-        'Content-Security-Policy': ['default-src * self blob: data: gap:; style-src * self blob: data: gap:; script-src * self blob: data: gap:; object-src * self blob: data: gap:; img-src * self blob: data: gap:; connect-src self * data: blob:; frame-src *;'],
-      }
-    });
+  callback({
+    responseHeaders: {
+      ...details.responseHeaders,
+      'Access-Control-Allow-Origin': ['*'],
+      'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* http://127.0.0.1:* data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://cdn.tailwindcss.com data: blob:; style-src 'self' 'unsafe-inline' http://localhost:* http://127.0.0.1:* https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: http://localhost:* http://127.0.0.1:* blob:;"],
+    }
   });
+});
 
   // Cargar la URL de la aplicación Laravel
   mainWindow.loadURL(isDev ? 'http://localhost:8000' : 'http://localhost:8000');
@@ -54,10 +54,8 @@ function createWindow() {
     }, 3000);
   });
 
-  // Abrir DevTools automáticamente si estamos en desarrollo
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
+  // Abrir DevTools automáticamente para depuración
+  mainWindow.webContents.openDevTools();
 
   // Gestionar ventanas emergentes y enlaces externos
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
