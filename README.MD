@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Animus Logo](https://e1.pngegg.com/pngimages/377/428/png-clipart-animus-logo-black-logo.png)
+![Animus Logo](https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/2375b6aa-3b46-4f38-96bb-2ad51c725965/d743dyb-f9ecdc9d-73e9-4bd2-a0e3-62a7f9c653c4.jpg/v1/fill/w_1024,h_683,q_75,strp/logo_del_animus_o_del_abstergo__assasins_creed__by_germaxx203_d743dyb-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9NjgzIiwicGF0aCI6IlwvZlwvMjM3NWI2YWEtM2I0Ni00ZjM4LTk2YmItMmFkNTFjNzI1OTY1XC9kNzQzZHliLWY5ZWNkYzlkLTczZTktNGJkMi1hMGUzLTYyYTdmOWM2NTNjNC5qcGciLCJ3aWR0aCI6Ijw9MTAyNCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.bJpuKFHAhCUWjD8We7yjJQYuAF4iouYB5gffSJDaeyo)
 
 **Un launcher de juegos inspirado en el universo de Assassin's Creed**
 
