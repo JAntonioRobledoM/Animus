@@ -178,7 +178,7 @@
                     <div class="w-6 h-6 bg-white rounded-full opacity-80"></div>
                 </div>
                 <span class="text-3xl font-orbitron font-bold text-hologram animate-glow tracking-widest">ANIMUS OS</span>
-                <div class="ml-4 text-xs text-abstergo-accent font-orbitron">v0.3</div>
+                <div class="ml-4 text-xs text-abstergo-accent font-orbitron">v1.0</div>
             </div>
             
             <div class="flex items-center space-x-6">
@@ -325,7 +325,7 @@
     <footer class="bg-black/90 border-t-2 border-abstergo-blue py-6 px-6 text-center relative mt-auto">
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent"></div>
         <div class="relative z-10">
-            <p class="text-abstergo-accent font-orbitron font-medium tracking-widest">ABSTERGO INDUSTRIES &copy; {{ date('Y') }} - ANIMUS OS v0.3</p>
+            <p class="text-abstergo-accent font-orbitron font-medium tracking-widest">ABSTERGO INDUSTRIES &copy; {{ date('Y') }} - ANIMUS OS v1.0</p>
             <p class="mt-2 text-sm text-gray-400 font-rajdhani">SISTEMA DE RECUPERACIÓN DE MEMORIAS GENÉTICAS</p>
             <div class="mt-3 w-32 h-0.5 bg-gradient-to-r from-transparent via-abstergo-blue to-transparent mx-auto"></div>
         </div>
