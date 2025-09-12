@@ -90,6 +90,7 @@
             border-radius: inherit;
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask-composite: exclude;
+            pointer-events: none; /* Prevent click interception */
         }
         .scan-line {
             position: absolute;
@@ -100,6 +101,7 @@
             background: linear-gradient(to bottom, transparent, #0082CA, transparent);
             animation: scan 3s ease-in-out infinite;
             opacity: 0.8;
+            pointer-events: none; /* Prevent click interception */
         }
         .card-glow {
             box-shadow: 0 4px 15px rgba(0, 130, 202, 0.1);
@@ -130,12 +132,20 @@
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
+            pointer-events: none; /* Prevent click interception */
         }
         .btn-hologram:hover::before {
             left: 100%;
         }
         .progress-glow {
             box-shadow: 0 0 10px #0082CA, inset 0 0 10px #0082CA;
+        }
+        input, textarea, button {
+            position: relative;
+            z-index: 20; /* Ensure inputs are above decorative elements */
+        }
+        input:focus, textarea:focus, button:focus {
+            outline: 2px solid #00a8ff; /* Visible focus outline for debugging */
         }
     </style>
 </head>
@@ -196,7 +206,7 @@
         <div class="flex items-center mb-12">
             <a href="{{ route('recuerdos.index') }}" class="text-abstergo-accent hover:text-abstergo-light-blue mr-4 transition-all duration-300">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" scan-line stroke-width="2" d="M15 19l-7-7 7-7" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
             </a>
             <div>
