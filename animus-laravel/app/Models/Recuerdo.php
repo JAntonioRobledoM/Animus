@@ -22,6 +22,7 @@ class Recuerdo extends Model
         'subtitle',
         'path',
         'position',
+        'year',
     ];
     
     /**

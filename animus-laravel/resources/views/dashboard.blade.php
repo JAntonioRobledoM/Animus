@@ -28,6 +28,7 @@
                         'glow': 'glow 2s ease-in-out infinite alternate',
                         'scan': 'scan 3s ease-in-out infinite',
                         'matrix': 'matrix 20s linear infinite',
+                        'spin-slow': 'spin 2s linear infinite',
                     },
                     keyframes: {
                         'pulse-blue': {
@@ -57,7 +58,6 @@
             position: relative;
             overflow-x: hidden;
         }
-        
         .matrix-bg {
             position: fixed;
             top: 0;
@@ -68,7 +68,6 @@
             opacity: 0.1;
             pointer-events: none;
         }
-        
         .matrix-rain {
             position: absolute;
             color: #0082CA;
@@ -77,14 +76,12 @@
             animation: matrix 20s linear infinite;
             opacity: 0.3;
         }
-        
         .hologram-border {
             position: relative;
             border: 1px solid transparent;
             background: linear-gradient(45deg, #0082CA, #00a8ff, #0082CA) border-box;
             border-radius: 8px;
         }
-        
         .hologram-border::before {
             content: '';
             position: absolute;
@@ -95,7 +92,6 @@
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask-composite: exclude;
         }
-        
         .scan-line {
             position: absolute;
             top: 0;
@@ -106,31 +102,26 @@
             animation: scan 3s ease-in-out infinite;
             opacity: 0.8;
         }
-        
         .card-glow {
             box-shadow: 0 4px 15px rgba(0, 130, 202, 0.1);
             transition: all 0.3s ease;
         }
-        
         .card-glow:hover {
             box-shadow: 0 8px 30px rgba(0, 130, 202, 0.3);
             transform: translateY(-5px);
         }
-        
         .text-hologram {
             background: linear-gradient(45deg, #0082CA, #00a8ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
         .btn-hologram {
             background: linear-gradient(45deg, rgba(0, 130, 202, 0.2), rgba(0, 168, 255, 0.2));
             border: 1px solid #0082CA;
             position: relative;
             overflow: hidden;
         }
-        
         .btn-hologram::before {
             content: '';
             position: absolute;
@@ -141,13 +132,15 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
         }
-        
         .btn-hologram:hover::before {
             left: 100%;
         }
-        
         .progress-glow {
             box-shadow: 0 0 10px #0082CA, inset 0 0 10px #0082CA;
+        }
+        .btn-hologram:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -182,7 +175,6 @@
             </div>
             
             <div class="flex items-center space-x-6">
-                <!-- Enlaces de navegación -->
                 <a href="{{ route('dashboard') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent px-3 py-1 font-medium tracking-wide">
                     DASHBOARD
                 </a>
@@ -214,15 +206,43 @@
                 <div class="w-full h-1 bg-gradient-to-r from-abstergo-blue via-abstergo-accent to-transparent rounded-full"></div>
             </div>
             
-            <!-- Botón para añadir nuevo recuerdo -->
-            <a href="{{ route('recuerdos.create') }}" class="btn-hologram text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 hover:scale-105 font-medium shadow-lg">
-                <div class="w-6 h-6 bg-gradient-to-br from-abstergo-blue to-abstergo-accent rounded-full flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                </div>
-                <span>AÑADIR NUEVO RECUERDO</span>
-            </a>
+            <div class="flex items-center space-x-4">
+                <!-- Botón para ordenar por campo -->
+                <button id="sort-field-toggle" class="btn-hologram text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 hover:scale-105 font-medium shadow-lg">
+                    <div class="w-6 h-6 bg-gradient-to-br from-abstergo-blue to-abstergo-accent rounded-full flex items-center justify-center">
+                        <svg id="sort-field-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                        </svg>
+                        <svg id="sort-field-loading" class="h-4 w-4 animate-spin-slow hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </div>
+                    <span id="sort-field-text">ORDENAR POR {{ in_array(request()->query('sort', 'position'), ['position', 'year']) ? (request()->query('sort', 'position') == 'position' ? 'POSICIÓN' : 'AÑO') : 'POSICIÓN' }}</span>
+                </button>
+                <!-- Botón para ordenar dirección -->
+                <button id="sort-direction-toggle" class="btn-hologram text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 hover:scale-105 font-medium shadow-lg">
+                    <div class="w-6 h-6 bg-gradient-to-br from-abstergo-blue to-abstergo-accent rounded-full flex items-center justify-center">
+                        <svg id="sort-direction-icon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ request()->query('direction', 'asc') == 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}" />
+                        </svg>
+                        <svg id="sort-direction-loading" class="h-4 w-4 animate-spin-slow hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                    </div>
+                    <span id="sort-direction-text">ORDEN {{ request()->query('direction', 'asc') == 'asc' ? 'ASCENDENTE' : 'DESCENDENTE' }}</span>
+                </button>
+                <!-- Botón para añadir nuevo recuerdo -->
+                <a href="{{ route('recuerdos.create') }}" class="btn-hologram text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 hover:scale-105 font-medium shadow-lg">
+                    <div class="w-6 h-6 bg-gradient-to-br from-abstergo-blue to-abstergo-accent rounded-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <span>AÑADIR NUEVO RECUERDO</span>
+                </a>
+            </div>
         </div>
         
         <!-- Notificaciones -->
@@ -285,8 +305,16 @@
                             <div class="p-6 relative z-10">
                                 <h3 class="text-xl font-orbitron font-semibold mb-2 text-white group-hover:text-abstergo-accent transition-colors duration-300">{{ $recuerdo->title }}</h3>
                                 @if($recuerdo->subtitle)
-                                    <p class="text-sm text-gray-400 mb-4 font-rajdhani">{{ $recuerdo->subtitle }}</p>
+                                    <p class="text-sm text-gray-400 mb-2 font-rajdhani">{{ $recuerdo->subtitle }}</p>
                                 @endif
+                                @if($recuerdo->year !== null)
+                                    <p class="text-sm text-abstergo-accent mb-2 font-rajdhani">
+                                        Año: {{ abs($recuerdo->year) }} {{ $recuerdo->year >= 0 ? 'd.C.' : 'a.C.' }}
+                                    </p>
+                                @endif
+                                <p class="text-sm text-abstergo-accent mb-4 font-rajdhani">
+                                    Posición: {{ $recuerdo->position }}
+                                </p>
                                 
                                 <div class="flex justify-between items-center mt-6">
                                     <div class="flex space-x-2">
@@ -437,7 +465,7 @@
             }, 50);
         }
 
-        // Configurar todos los botones de sincronización cuando el DOM esté listo
+        // Configurar todos los botones de sincronización y los botones de ordenar
         document.addEventListener('DOMContentLoaded', function() {
             // Seleccionar todos los botones de sincronización
             const syncButtons = document.querySelectorAll('.launch-game');
@@ -458,6 +486,58 @@
                     return false;
                 });
             });
+            
+            // Configurar el botón de ordenar por campo
+            const sortFieldButton = document.getElementById('sort-field-toggle');
+            const sortFieldIcon = document.getElementById('sort-field-icon');
+            const sortFieldLoading = document.getElementById('sort-field-loading');
+            const sortFieldText = document.getElementById('sort-field-text');
+            
+            sortFieldButton.addEventListener('click', function() {
+                // Mostrar estado de carga
+                sortFieldButton.disabled = true;
+                sortFieldIcon.classList.add('hidden');
+                sortFieldLoading.classList.remove('hidden');
+                sortFieldText.textContent = 'CARGANDO...';
+                
+                const currentSort = '{{ in_array(request()->query("sort", "position"), ["position", "year"]) ? request()->query("sort", "position") : "position" }}';
+                const currentDirection = '{{ in_array(request()->query("direction", "asc"), ["asc", "desc"]) ? request()->query("direction", "asc") : "asc" }}';
+                const newSort = currentSort === 'position' ? 'year' : 'position';
+                console.log(`Cambiando campo de orden a: ${newSort}, dirección: ${currentDirection}`);
+                
+                // Redirigir con los parámetros de orden
+                window.location.href = `{{ route('dashboard') }}?sort=${newSort}&direction=${currentDirection}`;
+            });
+            
+            // Configurar el botón de ordenar por dirección
+            const sortDirectionButton = document.getElementById('sort-direction-toggle');
+            const sortDirectionIcon = document.getElementById('sort-direction-icon');
+            const sortDirectionLoading = document.getElementById('sort-direction-loading');
+            const sortDirectionText = document.getElementById('sort-direction-text');
+            
+            sortDirectionButton.addEventListener('click', function() {
+                // Mostrar estado de carga
+                sortDirectionButton.disabled = true;
+                sortDirectionIcon.classList.add('hidden');
+                sortDirectionLoading.classList.remove('hidden');
+                sortDirectionText.textContent = 'CARGANDO...';
+                
+                const currentSort = '{{ in_array(request()->query("sort", "position"), ["position", "year"]) ? request()->query("sort", "position") : "position" }}';
+                const currentDirection = '{{ in_array(request()->query("direction", "asc"), ["asc", "desc"]) ? request()->query("direction", "asc") : "asc" }}';
+                const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+                console.log(`Cambiando dirección de orden a: ${newDirection}, campo: ${currentSort}`);
+                
+                // Redirigir con los parámetros de orden
+                window.location.href = `{{ route('dashboard') }}?sort=${currentSort}&direction=${newDirection}`;
+            });
+            
+            // Restaurar estado de los botones después de cargar la página
+            sortFieldButton.disabled = false;
+            sortFieldIcon.classList.remove('hidden');
+            sortFieldLoading.classList.add('hidden');
+            sortDirectionButton.disabled = false;
+            sortDirectionIcon.classList.remove('hidden');
+            sortDirectionLoading.classList.add('hidden');
             
             // Mensaje de depuración para confirmar funcionamiento
             if (isElectron()) {

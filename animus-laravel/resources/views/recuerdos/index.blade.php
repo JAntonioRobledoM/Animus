@@ -57,7 +57,6 @@
             position: relative;
             overflow-x: hidden;
         }
-        
         .matrix-bg {
             position: fixed;
             top: 0;
@@ -68,7 +67,6 @@
             opacity: 0.1;
             pointer-events: none;
         }
-        
         .matrix-rain {
             position: absolute;
             color: #0082CA;
@@ -77,14 +75,12 @@
             animation: matrix 20s linear infinite;
             opacity: 0.3;
         }
-        
         .hologram-border {
             position: relative;
             border: 1px solid transparent;
             background: linear-gradient(45deg, #0082CA, #00a8ff, #0082CA) border-box;
             border-radius: 8px;
         }
-        
         .hologram-border::before {
             content: '';
             position: absolute;
@@ -95,7 +91,6 @@
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask-composite: exclude;
         }
-        
         .scan-line {
             position: absolute;
             top: 0;
@@ -106,31 +101,26 @@
             animation: scan 3s ease-in-out infinite;
             opacity: 0.8;
         }
-        
         .card-glow {
             box-shadow: 0 4px 15px rgba(0, 130, 202, 0.1);
             transition: all 0.3s ease;
         }
-        
         .card-glow:hover {
             box-shadow: 0 8px 30px rgba(0, 130, 202, 0.3);
             transform: translateY(-5px);
         }
-        
         .text-hologram {
             background: linear-gradient(45deg, #0082CA, #00a8ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
         .btn-hologram {
             background: linear-gradient(45deg, rgba(0, 130, 202, 0.2), rgba(0, 168, 255, 0.2));
             border: 1px solid #0082CA;
             position: relative;
             overflow: hidden;
         }
-        
         .btn-hologram::before {
             content: '';
             position: absolute;
@@ -141,18 +131,15 @@
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
         }
-        
         .btn-hologram:hover::before {
             left: 100%;
         }
-        
         .progress-glow {
             box-shadow: 0 0 10px #0082CA, inset 0 0 10px #0082CA;
         }
     </style>
 </head>
 <body class="bg-abstergo-dark font-rajdhani text-white flex flex-col min-h-screen relative">
-    <!-- Fondo Matrix -->
     <div class="matrix-bg">
         <div class="matrix-rain" style="left: 5%; animation-delay: 0s;">01010101</div>
         <div class="matrix-rain" style="left: 15%; animation-delay: 2s;">11001100</div>
@@ -165,11 +152,7 @@
         <div class="matrix-rain" style="left: 85%; animation-delay: 4.5s;">11001100</div>
         <div class="matrix-rain" style="left: 95%; animation-delay: 0.5s;">10101010</div>
     </div>
-
-    <!-- Línea de escaneo -->
     <div class="scan-line"></div>
-
-    <!-- Barra de navegación superior -->
     <nav class="bg-black/90 border-b-2 border-abstergo-blue shadow-lg shadow-abstergo-blue/20 py-4 px-6 relative">
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent"></div>
         <div class="flex justify-between items-center relative z-10">
@@ -180,7 +163,6 @@
                 <span class="text-3xl font-orbitron font-bold text-hologram animate-glow tracking-widest">ANIMUS OS</span>
                 <div class="ml-4 text-xs text-abstergo-accent font-orbitron">v1.0</div>
             </div>
-            
             <div class="flex items-center space-x-6">
                 <a href="{{ route('dashboard') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
                     DASHBOARD
@@ -188,7 +170,6 @@
                 <a href="{{ route('recuerdos.index') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent px-3 py-1 font-medium tracking-wide">
                     GESTIONAR RECUERDOS
                 </a>
-                
                 <div class="flex items-center space-x-4 ml-8">
                     <div class="text-sm text-abstergo-accent font-orbitron">USUARIO:</div>
                     <div class="text-white font-medium">{{ auth()->user()->name }}</div>
@@ -202,8 +183,6 @@
             </div>
         </div>
     </nav>
-    
-    <!-- Contenido principal -->
     <main class="container mx-auto px-6 py-8 flex-grow relative z-10">
         <div class="flex justify-between items-center mb-12">
             <div>
@@ -212,7 +191,6 @@
                 </h1>
                 <div class="w-full h-1 bg-gradient-to-r from-abstergo-blue via-abstergo-accent to-transparent rounded-full"></div>
             </div>
-            
             <a href="{{ route('recuerdos.create') }}" class="btn-hologram text-white px-6 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 hover:scale-105 font-medium shadow-lg">
                 <div class="w-6 h-6 bg-gradient-to-br from-abstergo-blue to-abstergo-accent rounded-full flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -222,8 +200,6 @@
                 <span>AÑADIR NUEVO RECUERDO</span>
             </a>
         </div>
-        
-        <!-- Mensajes de notificación -->
         @if(session('success'))
             <div class="bg-gradient-to-r from-green-500/20 to-green-600/20 border-l-4 border-green-400 p-6 mb-8 rounded-r-lg shadow-lg">
                 <div class="flex items-center">
@@ -236,8 +212,6 @@
                 </div>
             </div>
         @endif
-        
-        <!-- Tabla de recuerdos -->
         <div class="hologram-border bg-gradient-to-br from-black/80 to-abstergo-gray/50 rounded-xl overflow-hidden card-glow">
             <table class="w-full">
                 <thead class="bg-gradient-to-r from-abstergo-blue/20 to-abstergo-accent/20 border-b border-abstergo-blue/40">
@@ -245,6 +219,7 @@
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">IMAGEN</th>
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">TÍTULO</th>
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">SUBTÍTULO</th>
+                        <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">AÑO</th>
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">POSICIÓN</th>
                         <th class="py-4 px-6 text-center font-orbitron text-abstergo-accent">ACCIONES</th>
                     </tr>
@@ -264,6 +239,7 @@
                             </td>
                             <td class="py-4 px-6 font-medium text-white group-hover:text-abstergo-accent transition-colors duration-300">{{ $recuerdo->title }}</td>
                             <td class="py-4 px-6 text-gray-400">{{ $recuerdo->subtitle ?? '—' }}</td>
+                            <td class="py-4 px-6 text-gray-400">{{ $recuerdo->year ?? '—' }}</td>
                             <td class="py-4 px-6 text-gray-400">{{ $recuerdo->position }}</td>
                             <td class="py-4 px-6 flex justify-center space-x-3">
                                 <a href="{{ route('recuerdos.show', $recuerdo) }}" class="btn-hologram text-white px-4 py-2 rounded-md text-sm transition-all duration-300 font-medium hover:bg-abstergo-blue/50">
@@ -283,7 +259,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center">
+                            <td colspan="6" class="py-12 text-center">
                                 <div class="hologram-border bg-gradient-to-br from-abstergo-blue/10 to-abstergo-accent/10 rounded-xl p-12 relative overflow-hidden card-glow">
                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent animate-pulse"></div>
                                     <div class="relative z-10">
@@ -306,8 +282,6 @@
             </table>
         </div>
     </main>
-    
-    <!-- Pie de página -->
     <footer class="bg-black/90 border-t-2 border-abstergo-blue py-6 px-6 text-center relative mt-auto">
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent"></div>
         <div class="relative z-10">

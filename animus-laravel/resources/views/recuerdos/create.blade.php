@@ -90,7 +90,7 @@
             border-radius: inherit;
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask-composite: exclude;
-            pointer-events: none; /* Prevent click interception */
+            pointer-events: none;
         }
         .scan-line {
             position: absolute;
@@ -101,7 +101,7 @@
             background: linear-gradient(to bottom, transparent, #0082CA, transparent);
             animation: scan 3s ease-in-out infinite;
             opacity: 0.8;
-            pointer-events: none; /* Prevent click interception */
+            pointer-events: none;
         }
         .card-glow {
             box-shadow: 0 4px 15px rgba(0, 130, 202, 0.1);
@@ -132,7 +132,7 @@
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
-            pointer-events: none; /* Prevent click interception */
+            pointer-events: none;
         }
         .btn-hologram:hover::before {
             left: 100%;
@@ -142,15 +142,14 @@
         }
         input, textarea, button {
             position: relative;
-            z-index: 20; /* Ensure inputs are above decorative elements */
+            z-index: 20;
         }
         input:focus, textarea:focus, button:focus {
-            outline: 2px solid #00a8ff; /* Visible focus outline for debugging */
+            outline: 2px solid #00a8ff;
         }
     </style>
 </head>
 <body class="bg-abstergo-dark font-rajdhani text-white flex flex-col min-h-screen relative">
-    <!-- Fondo Matrix -->
     <div class="matrix-bg">
         <div class="matrix-rain" style="left: 5%; animation-delay: 0s;">01010101</div>
         <div class="matrix-rain" style="left: 15%; animation-delay: 2s;">11001100</div>
@@ -163,11 +162,7 @@
         <div class="matrix-rain" style="left: 85%; animation-delay: 4.5s;">11001100</div>
         <div class="matrix-rain" style="left: 95%; animation-delay: 0.5s;">10101010</div>
     </div>
-
-    <!-- Línea de escaneo -->
     <div class="scan-line"></div>
-
-    <!-- Barra de navegación superior -->
     <nav class="bg-black/90 border-b-2 border-abstergo-blue shadow-lg shadow-abstergo-blue/20 py-4 px-6 relative">
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent"></div>
         <div class="flex justify-between items-center relative z-10">
@@ -178,7 +173,6 @@
                 <span class="text-3xl font-orbitron font-bold text-hologram animate-glow tracking-widest">ANIMUS OS</span>
                 <div class="ml-4 text-xs text-abstergo-accent font-orbitron">v1.0</div>
             </div>
-            
             <div class="flex items-center space-x-6">
                 <a href="{{ route('dashboard') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
                     DASHBOARD
@@ -186,7 +180,6 @@
                 <a href="{{ route('recuerdos.index') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent px-3 py-1 font-medium tracking-wide">
                     GESTIONAR RECUERDOS
                 </a>
-                
                 <div class="flex items-center space-x-4 ml-8">
                     <div class="text-sm text-abstergo-accent font-orbitron">USUARIO:</div>
                     <div class="text-white font-medium">{{ auth()->user()->name }}</div>
@@ -200,8 +193,6 @@
             </div>
         </div>
     </nav>
-    
-    <!-- Contenido principal -->
     <main class="container mx-auto px-6 py-8 flex-grow relative z-10">
         <div class="flex items-center mb-12">
             <a href="{{ route('recuerdos.index') }}" class="text-abstergo-accent hover:text-abstergo-light-blue mr-4 transition-all duration-300">
@@ -216,8 +207,6 @@
                 <div class="w-full h-1 bg-gradient-to-r from-abstergo-blue via-abstergo-accent to-transparent rounded-full"></div>
             </div>
         </div>
-        
-        <!-- Errores de validación -->
         @if ($errors->any())
             <div class="bg-gradient-to-r from-red-500/20 to-red-600/20 border-l-4 border-red-400 p-6 mb-8 rounded-r-lg shadow-lg">
                 <div class="flex items-center">
@@ -237,44 +226,41 @@
                 </div>
             </div>
         @endif
-        
-        <!-- Formulario -->
         <div class="hologram-border bg-gradient-to-br from-black/80 to-abstergo-gray/50 rounded-xl p-8 card-glow">
             <form action="{{ route('recuerdos.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <div class="mb-6">
                             <label for="title" class="block text-abstergo-accent mb-2 font-orbitron">TÍTULO</label>
                             <input type="text" name="title" id="title" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('title') }}" required>
                         </div>
-                        
                         <div class="mb-6">
                             <label for="subtitle" class="block text-abstergo-accent mb-2 font-orbitron">SUBTÍTULO</label>
                             <input type="text" name="subtitle" id="subtitle" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('subtitle') }}">
                         </div>
-                        
+                        <div class="mb-6">
+                            <label for="year" class="block text-abstergo-accent mb-2 font-orbitron">AÑO</label>
+                            <input type="number" name="year" id="year" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('year') }}">
+                            <p class="text-xs text-gray-400 mt-1 font-rajdhani">Año asociado al recuerdo (opcional).</p>
+                        </div>
                         <div class="mb-6">
                             <label for="position" class="block text-abstergo-accent mb-2 font-orbitron">POSICIÓN</label>
                             <input type="number" name="position" id="position" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('position') }}" placeholder="Se asignará automáticamente si se deja vacío">
                             <p class="text-xs text-gray-400 mt-1 font-rajdhani">Determina el orden de los recuerdos. Menor número = mayor prioridad.</p>
                         </div>
-                        
                         <div class="mb-6">
                             <label for="path" class="block text-abstergo-accent mb-2 font-orbitron">RUTA DEL EJECUTABLE (.exe)</label>
                             <input type="text" name="path" id="path" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('path') }}" placeholder="C:\Juegos\AssassinsCreed\AC.exe">
                             <p class="text-xs text-gray-400 mt-1 font-rajdhani">Ruta completa al ejecutable del juego. Ejemplo: C:\Juegos\AssassinsCreed\AC.exe</p>
                         </div>
                     </div>
-                    
                     <div>
                         <div class="mb-6">
                             <label for="img" class="block text-abstergo-accent mb-2 font-orbitron">IMAGEN</label>
                             <input type="file" name="img" id="img" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" accept="image/*">
                             <p class="text-xs text-gray-400 mt-1 font-rajdhani">Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 2MB.</p>
                         </div>
-                        
                         <div class="mb-6">
                             <label class="block text-abstergo-accent mb-2 font-orbitron">VISTA PREVIA DE IMAGEN</label>
                             <div class="hologram-border rounded h-40 flex items-center justify-center relative overflow-hidden" id="imagePreview">
@@ -284,7 +270,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="flex justify-end mt-8 space-x-4">
                     <a href="{{ route('recuerdos.index') }}" class="btn-hologram text-white px-6 py-3 rounded-md transition-all duration-300 hover:bg-abstergo-gray/50 font-medium">
                         CANCELAR
@@ -296,8 +281,6 @@
             </form>
         </div>
     </main>
-    
-    <!-- Pie de página -->
     <footer class="bg-black/90 border-t-2 border-abstergo-blue py-6 px-6 text-center relative mt-auto">
         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent"></div>
         <div class="relative z-10">
@@ -306,23 +289,18 @@
             <div class="mt-3 w-32 h-0.5 bg-gradient-to-r from-transparent via-abstergo-blue to-transparent mx-auto"></div>
         </div>
     </footer>
-    
     <script>
-        // Vista previa de imagen
         document.getElementById('img').addEventListener('change', function(e) {
             const preview = document.getElementById('imagePreview');
             preview.innerHTML = '';
-            
             if (this.files && this.files[0]) {
                 const reader = new FileReader();
-                
                 reader.onload = function(e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.classList.add('h-full', 'w-auto', 'object-contain', 'mx-auto', 'relative', 'z-10');
                     preview.appendChild(img);
                 }
-                
                 reader.readAsDataURL(this.files[0]);
             } else {
                 preview.innerHTML = '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/10 to-transparent animate-pulse"></div><span class="text-gray-400 font-rajdhani relative z-10">No se ha seleccionado ninguna imagen</span>';
