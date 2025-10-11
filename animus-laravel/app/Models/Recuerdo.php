@@ -23,6 +23,9 @@ class Recuerdo extends Model
         'path',
         'position',
         'year',
+        'lugar',
+        'latitud',
+        'longitud',
     ];
     
     /**

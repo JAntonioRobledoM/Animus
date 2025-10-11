@@ -170,6 +170,9 @@
                 <a href="{{ route('recuerdos.index') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent px-3 py-1 font-medium tracking-wide">
                     GESTIONAR RECUERDOS
                 </a>
+                <a href="{{ route('map.index') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
+                    MAPA DE RECUERDOS
+                </a>
                 <div class="flex items-center space-x-4 ml-8">
                     <div class="text-sm text-abstergo-accent font-orbitron">USUARIO:</div>
                     <div class="text-white font-medium">{{ auth()->user()->name }}</div>
@@ -220,6 +223,7 @@
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">TÍTULO</th>
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">SUBTÍTULO</th>
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">AÑO</th>
+                        <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">LUGAR</th>
                         <th class="py-4 px-6 text-left font-orbitron text-abstergo-accent">POSICIÓN</th>
                         <th class="py-4 px-6 text-center font-orbitron text-abstergo-accent">ACCIONES</th>
                     </tr>
@@ -240,6 +244,18 @@
                             <td class="py-4 px-6 font-medium text-white group-hover:text-abstergo-accent transition-colors duration-300">{{ $recuerdo->title }}</td>
                             <td class="py-4 px-6 text-gray-400">{{ $recuerdo->subtitle ?? '—' }}</td>
                             <td class="py-4 px-6 text-gray-400">{{ $recuerdo->year ?? '—' }}</td>
+                            <td class="py-4 px-6 text-gray-400">
+                                @if($recuerdo->lugar)
+                                    <span class="flex items-center">
+                                        <svg class="w-3 h-3 mr-1 text-abstergo-accent" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $recuerdo->lugar }}
+                                    </span>
+                                @else
+                                    —
+                                @endif
+                            </td>
                             <td class="py-4 px-6 text-gray-400">{{ $recuerdo->position }}</td>
                             <td class="py-4 px-6 flex justify-center space-x-3">
                                 <a href="{{ route('recuerdos.show', $recuerdo) }}" class="btn-hologram text-white px-4 py-2 rounded-md text-sm transition-all duration-300 font-medium hover:bg-abstergo-blue/50">
@@ -259,7 +275,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-12 text-center">
+                            <td colspan="7" class="py-12 text-center">
                                 <div class="hologram-border bg-gradient-to-br from-abstergo-blue/10 to-abstergo-accent/10 rounded-xl p-12 relative overflow-hidden card-glow">
                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent animate-pulse"></div>
                                     <div class="relative z-10">

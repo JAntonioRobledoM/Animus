@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan make:migration:*)",
+      "Bash(php artisan:*)",
+      "Bash(findstr:*)",
+      "Bash(php:*)",
+      "Bash(del \"c:\\Users\\janto\\Desktop\\VSC\\Animus\\animus-laravel\\check_recuerdos.php\")",
+      "Bash(curl:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

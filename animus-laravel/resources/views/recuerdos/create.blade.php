@@ -180,6 +180,9 @@
                 <a href="{{ route('recuerdos.index') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent px-3 py-1 font-medium tracking-wide">
                     GESTIONAR RECUERDOS
                 </a>
+                <a href="{{ route('map.index') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
+                    MAPA DE RECUERDOS
+                </a>
                 <div class="flex items-center space-x-4 ml-8">
                     <div class="text-sm text-abstergo-accent font-orbitron">USUARIO:</div>
                     <div class="text-white font-medium">{{ auth()->user()->name }}</div>
@@ -243,6 +246,11 @@
                             <label for="year" class="block text-abstergo-accent mb-2 font-orbitron">AÑO</label>
                             <input type="number" name="year" id="year" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('year') }}">
                             <p class="text-xs text-gray-400 mt-1 font-rajdhani">Año asociado al recuerdo (opcional).</p>
+                        </div>
+                        <div class="mb-6">
+                            <label for="lugar" class="block text-abstergo-accent mb-2 font-orbitron">LUGAR</label>
+                            <input type="text" name="lugar" id="lugar" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('lugar') }}" placeholder="Madrid, España">
+                            <p class="text-xs text-gray-400 mt-1 font-rajdhani">Ciudad, país o región del recuerdo. Las coordenadas se calcularán automáticamente.</p>
                         </div>
                         <div class="mb-6">
                             <label for="position" class="block text-abstergo-accent mb-2 font-orbitron">POSICIÓN</label>

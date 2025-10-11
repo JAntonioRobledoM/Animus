@@ -224,9 +224,20 @@
                             <p class="text-abstergo-accent text-sm font-orbitron">POSICIÓN</p>
                             <p class="text-white">{{ $recuerdo->position }}</p>
                         </div>
+                        @if($recuerdo->lugar)
                         <div>
+                            <p class="text-abstergo-accent text-sm font-orbitron">LUGAR</p>
+                            <p class="text-white flex items-center">
+                                <svg class="w-4 h-4 mr-1 text-abstergo-accent" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                </svg>
+                                {{ $recuerdo->lugar }}
+                            </p>
+                        </div>
+                        @endif
+                        <div class="{{ $recuerdo->lugar ? '' : 'col-span-2' }}">
                             <p class="text-abstergo-accent text-sm font-orbitron">RUTA DEL EJECUTABLE</p>
-                            <p class="text-white">{{ $recuerdo->path ?? 'No especificado' }}</p>
+                            <p class="text-white text-xs break-all">{{ $recuerdo->path ?? 'No especificado' }}</p>
                         </div>
                     </div>
                     <div class="flex space-x-4">

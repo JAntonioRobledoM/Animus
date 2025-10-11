@@ -47,6 +47,7 @@ class RecuerdosController extends Controller
             'position' => 'nullable|integer',
             'path' => 'nullable|string|max:255',
             'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'lugar' => 'nullable|string|max:255',
         ]);
 
         $data = $request->except('img');
@@ -56,6 +57,15 @@ class RecuerdosController extends Controller
         if (!$request->has('position') || $request->position === null) {
             $lastPosition = Auth::user()->recuerdos()->max('position') ?? 0;
             $data['position'] = $lastPosition + 1;
+        }
+
+        // Geocodificación automática si se proporciona un lugar
+        if ($request->has('lugar') && !empty($request->lugar)) {
+            $coordinates = $this->geocode($request->lugar);
+            if ($coordinates) {
+                $data['latitud'] = $coordinates['lat'];
+                $data['longitud'] = $coordinates['lon'];
+            }
         }
 
         // Manejo de la imagen (si se proporciona)
@@ -114,9 +124,19 @@ class RecuerdosController extends Controller
             'position' => 'nullable|integer',
             'path' => 'nullable|string|max:255',
             'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'lugar' => 'nullable|string|max:255',
         ]);
 
         $data = $request->except(['img', '_token', '_method']);
+
+        // Geocodificación automática si se proporciona un lugar y ha cambiado
+        if ($request->has('lugar') && !empty($request->lugar) && $request->lugar !== $recuerdo->lugar) {
+            $coordinates = $this->geocode($request->lugar);
+            if ($coordinates) {
+                $data['latitud'] = $coordinates['lat'];
+                $data['longitud'] = $coordinates['lon'];
+            }
+        }
 
         // Manejo de la imagen (si se proporciona una nueva)
         if ($request->hasFile('img')) {
@@ -191,5 +211,54 @@ class RecuerdosController extends Controller
             ->firstOrFail();
 
         return view('recuerdos.visualizar', compact('recuerdo'));
+    }
+
+    /**
+     * Geocodifica una dirección usando la API de Nominatim (OpenStreetMap)
+     *
+     * @param string $address La dirección a geocodificar (ciudad, país, región)
+     * @return array|null Coordenadas ['lat' => ..., 'lon' => ...] o null si falla
+     */
+    private function geocode($address)
+    {
+        try {
+            // Construir la URL para la API de Nominatim
+            $url = 'https://nominatim.openstreetmap.org/search?' . http_build_query([
+                'q' => $address,
+                'format' => 'json',
+                'limit' => 1,
+                'addressdetails' => 0
+            ]);
+
+            // Configurar el contexto HTTP con un User-Agent (requerido por Nominatim)
+            $context = stream_context_create([
+                'http' => [
+                    'header' => "User-Agent: Animus-Laravel/1.0\r\n"
+                ]
+            ]);
+
+            // Realizar la petición
+            $response = @file_get_contents($url, false, $context);
+
+            if ($response === false) {
+                return null;
+            }
+
+            $data = json_decode($response, true);
+
+            // Si se encontraron resultados, devolver las coordenadas
+            if (!empty($data) && isset($data[0]['lat']) && isset($data[0]['lon'])) {
+                return [
+                    'lat' => $data[0]['lat'],
+                    'lon' => $data[0]['lon']
+                ];
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            // En caso de error, registrar y devolver null
+            \Log::error('Error en geocodificación: ' . $e->getMessage());
+            return null;
+        }
     }
 }

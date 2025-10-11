@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RecuerdosController;
+use App\Http\Controllers\MapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,10 +24,13 @@ Route::get('/create-user', [AuthController::class, 'createUser']);
 Route::middleware(['auth'])->group(function () {
     // Dashboard principal
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // Rutas para gestión de recuerdos
     Route::resource('recuerdos', RecuerdosController::class);
-    
+
     // Ruta para visualizar un recuerdo específico (simulación del Animus)
     Route::get('/recuerdo/{slug}', [RecuerdosController::class, 'visualizar'])->name('recuerdos.visualizar');
+
+    // Ruta para el mapa de recuerdos
+    Route::get('/map', [MapController::class, 'index'])->name('map.index');
 });
