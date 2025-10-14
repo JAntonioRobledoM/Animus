@@ -12,33 +12,35 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
+    fullscreen: true,  // Abrir en pantalla completa
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: false,  // Desactivar seguridad web para permitir CORS
-      allowRunningInsecureContent: true,  // Permitir contenido inseguro
+      // Habilitar webSecurity en desarrollo (solo deshabilitar en producción si es absolutamente necesario)
+      webSecurity: true,
       preload: path.join(__dirname, 'preload.js')
     },
     icon: path.join(__dirname, 'assets/icons/icon.png')
   });
 
-  // Configurar headers de CORS para todas las solicitudes
-  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    details.requestHeaders['Origin'] = 'http://localhost:8000';
-    details.requestHeaders['Access-Control-Allow-Origin'] = '*';
-    callback({ cancel: false, requestHeaders: details.requestHeaders });
-  });
-
-  // Configurar política de seguridad de contenido para permitir estilos y scripts inline
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-  callback({
-    responseHeaders: {
-      ...details.responseHeaders,
-      'Access-Control-Allow-Origin': ['*'],
-      'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* http://127.0.0.1:* data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://cdn.tailwindcss.com data: blob:; style-src 'self' 'unsafe-inline' http://localhost:* http://127.0.0.1:* https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: http://localhost:* http://127.0.0.1:* blob:;"],
-    }
-  });
-});
+  // Configurar CSP solo para desarrollo
+  if (isDev) {
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Content-Security-Policy': [
+            "default-src 'self' http://localhost:* http://127.0.0.1:* data: blob:; " +
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://cdn.tailwindcss.com; " +
+            "style-src 'self' 'unsafe-inline' http://localhost:* http://127.0.0.1:* https://fonts.googleapis.com https://cdn.tailwindcss.com; " +
+            "font-src 'self' data: https://fonts.gstatic.com; " +
+            "img-src 'self' data: http://localhost:* http://127.0.0.1:* blob:; " +
+            "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"
+          ],
+        }
+      });
+    });
+  }
 
   // Cargar la URL de la aplicación Laravel
   mainWindow.loadURL(isDev ? 'http://localhost:8000' : 'http://localhost:8000');
@@ -46,16 +48,13 @@ function createWindow() {
   // Manejar errores de carga
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
     console.error('Error al cargar la página:', errorCode, errorDescription);
-    
+
     // Reintento automático después de un breve retraso
     setTimeout(() => {
       console.log('Reintentando cargar la página...');
       mainWindow.loadURL(isDev ? 'http://localhost:8000' : 'http://localhost:8000');
     }, 3000);
   });
-
-  // Abrir DevTools automáticamente para depuración
-  mainWindow.webContents.openDevTools();
 
   // Gestionar ventanas emergentes y enlaces externos
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
