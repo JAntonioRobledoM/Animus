@@ -118,6 +118,51 @@
             height: 20px;
             box-shadow: 0 0 10px rgba(0, 130, 202, 0.8);
         }
+        /* Estilos para la navegación entre recuerdos en la misma ubicación */
+        .nav-arrows {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(0, 130, 202, 0.3);
+        }
+        .nav-arrows a.prev-btn,
+        .nav-arrows a.next-btn {
+            background: rgba(0, 130, 202, 0.2);
+            border: 1px solid #0082CA;
+            color: #00d4ff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .nav-arrows a.prev-btn:hover,
+        .nav-arrows a.next-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 130, 202, 0.5);
+            text-decoration: none;
+        }
+        .nav-arrows a.prev-btn:active,
+        .nav-arrows a.next-btn:active,
+        .nav-arrows a.prev-btn:focus,
+        .nav-arrows a.next-btn:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.7);
+            text-decoration: none;
+        }
+        .nav-arrows .current-index {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            align-items: center;
+        }
+        /* Evitar que los botones sean afectados por eventos de Leaflet */
+        .leaflet-popup-pane button {
+            pointer-events: auto !important;
+        }
     </style>
 </head>
 <body class="bg-abstergo-dark font-rajdhani text-white flex flex-col min-h-screen relative">
@@ -244,7 +289,19 @@
     <script>
         @if(!$recuerdos->isEmpty())
         console.log('Inicializando mapa...');
-        console.log('Recuerdos:', @json($recuerdos));
+
+        // Función global para navegación entre recuerdos
+        window.navegarRecuerdo = function(locationKey, direction) {
+            // Buscar el marcador correcto
+            for (var i = 0; i < allMarkers.length; i++) {
+                var marker = allMarkers[i];
+                if (marker.groupData && marker.groupData.locationKey === locationKey) {
+                    navigateRecuerdos(marker, direction);
+                    return false;
+                }
+            }
+            return false;
+        };
 
         // Inicializar el mapa centrado en el mundo
         var map = L.map('map', {
@@ -254,8 +311,6 @@
             maxZoom: 19
         });
 
-        console.log('Mapa inicializado');
-
         // Capa base oscura tipo Animus - usando OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -263,8 +318,6 @@
             maxZoom: 19,
             className: 'map-tiles'
         }).addTo(map);
-
-        console.log('Capa base añadida');
 
         // Datos de los recuerdos
         var recuerdos = @json($recuerdos);
@@ -278,51 +331,193 @@
             popupAnchor: [0, -10]
         });
 
-        // Añadir marcadores
-        var markers = [];
-        recuerdos.forEach(function(recuerdo) {
-            console.log('Añadiendo marcador:', recuerdo.title, 'en', recuerdo.latitud, recuerdo.longitud);
+        // Agrupar recuerdos por ubicación
+        var locationGroups = {};
 
-            var marker = L.marker([parseFloat(recuerdo.latitud), parseFloat(recuerdo.longitud)], {
+        // Procesar cada recuerdo y agruparlos por ubicación
+        recuerdos.forEach(function(recuerdo, index) {
+            // Crear una clave única para esta ubicación
+            var locationKey = parseFloat(recuerdo.latitud).toFixed(6) + '_' + parseFloat(recuerdo.longitud).toFixed(6);
+
+            // Inicializar el grupo si no existe
+            if (!locationGroups[locationKey]) {
+                locationGroups[locationKey] = {
+                    lat: parseFloat(recuerdo.latitud),
+                    lng: parseFloat(recuerdo.longitud),
+                    lugar: recuerdo.lugar,
+                    items: []
+                };
+            }
+
+            // Añadir este recuerdo al grupo
+            locationGroups[locationKey].items.push(recuerdo);
+        });
+
+        console.log('Ubicaciones agrupadas:', Object.keys(locationGroups).length);
+
+        // Crear marcadores para cada ubicación
+        var allMarkers = [];
+
+        Object.keys(locationGroups).forEach(function(locationKey) {
+            var group = locationGroups[locationKey];
+            var position = [group.lat, group.lng];
+
+            console.log('Creando marcador para la ubicación:', locationKey, 'con', group.items.length, 'recuerdos');
+
+            var marker = L.marker(position, {
                 icon: customIcon
-            }).addTo(map);
+            });
 
-            var popupContent = '<div class="font-rajdhani">' +
+            // Si hay solo un recuerdo en esta ubicación
+            if (group.items.length === 1) {
+                var recuerdo = group.items[0];
+
+                var popupContent = '<div class="font-rajdhani">' +
+                    '<div class="font-orbitron font-bold text-abstergo-accent mb-2">' + recuerdo.title + '</div>';
+
+                if (recuerdo.subtitle) {
+                    popupContent += '<div class="text-sm text-gray-300 mb-2">' + recuerdo.subtitle + '</div>';
+                }
+
+                popupContent += '<div class="text-sm text-gray-400 mb-1">' +
+                    '<svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">' +
+                    '<path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>' +
+                    '</svg>' + group.lugar + '</div>';
+
+                if (recuerdo.year) {
+                    popupContent += '<div class="text-xs text-gray-500">Año: ' + recuerdo.year + '</div>';
+                }
+
+                popupContent += '</div>';
+
+                marker.bindPopup(popupContent);
+            }
+            // Si hay múltiples recuerdos en esta ubicación
+            else {
+                // Crear un popup con navegación entre recuerdos
+                marker.groupData = {
+                    locationKey: locationKey,
+                    currentIndex: 0,
+                    items: group.items,
+                    lugar: group.lugar
+                };
+
+                // Generar el contenido del popup para el primer recuerdo
+                var initialPopupContent = createPopupContent(marker, 0);
+                marker.bindPopup(initialPopupContent);
+
+                // Añadir un manejador de eventos para cuando se abra el popup
+                marker.on('popupopen', function(e) {
+                    // Esto asegura que los botones de navegación funcionen después de abrir el popup
+                    setupNavButtons(this.getPopup(), this);
+                });
+            }
+
+            marker.addTo(map);
+            allMarkers.push(marker);
+        });
+
+        // Función para generar el contenido del popup
+        function createPopupContent(marker, index) {
+            var data = marker.groupData;
+            var recuerdo = data.items[index];
+
+            var content = '<div class="font-rajdhani" data-location-key="' + data.locationKey + '" data-index="' + index + '">' +
                 '<div class="font-orbitron font-bold text-abstergo-accent mb-2">' + recuerdo.title + '</div>';
 
             if (recuerdo.subtitle) {
-                popupContent += '<div class="text-sm text-gray-300 mb-2">' + recuerdo.subtitle + '</div>';
+                content += '<div class="text-sm text-gray-300 mb-2">' + recuerdo.subtitle + '</div>';
             }
 
-            popupContent += '<div class="text-sm text-gray-400 mb-1">' +
+            content += '<div class="text-sm text-gray-400 mb-1">' +
                 '<svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">' +
                 '<path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>' +
-                '</svg>' + recuerdo.lugar + '</div>';
+                '</svg>' + data.lugar + '</div>';
 
             if (recuerdo.year) {
-                popupContent += '<div class="text-xs text-gray-500">Año: ' + recuerdo.year + '</div>';
+                content += '<div class="text-xs text-gray-500">Año: ' + recuerdo.year + '</div>';
             }
 
-            popupContent += '</div>';
+            // Añadir controles de navegación si hay más de un recuerdo
+            if (data.items.length > 1) {
+                content += '<div class="nav-arrows leaflet-popup-content" id="nav-' + data.locationKey + '-' + index + '">' +
+                    '<a href="javascript:void(0)" class="prev-btn leaflet-interactive" onclick="navegarRecuerdo(\'' + data.locationKey + '\', -1); event.stopPropagation(); return false;">&larr; Anterior</a>' +
+                    '<div class="current-index">' + (index + 1) + ' de ' + data.items.length + '</div>' +
+                    '<a href="javascript:void(0)" class="next-btn leaflet-interactive" onclick="navegarRecuerdo(\'' + data.locationKey + '\', 1); event.stopPropagation(); return false;">Siguiente &rarr;</a>' +
+                '</div>';
+            }
 
-            marker.bindPopup(popupContent);
-            markers.push(marker);
-        });
+            content += '</div>';
 
-        console.log('Marcadores añadidos:', markers.length);
+            return content;
+        }
+
+        // Función para configurar los botones de navegación en el popup
+        function setupNavButtons(popup, marker) {
+            // Esta función ahora es más simple, ya que usamos enlaces con
+            // funciones globales en lugar de event listeners locales.
+            // Se mantiene por si necesitamos hacer alguna configuración adicional en el futuro
+            console.log('Popup preparado para la navegación');
+        }
+
+        // Función para navegar entre recuerdos de un marcador
+        function navigateRecuerdos(marker, direction) {
+            try {
+                var data = marker.groupData;
+                var newIndex = data.currentIndex + direction;
+
+                // Asegurar que el índice esté dentro de los límites
+                if (newIndex < 0) {
+                    newIndex = data.items.length - 1; // Ir al último si estamos al inicio
+                } else if (newIndex >= data.items.length) {
+                    newIndex = 0; // Volver al inicio si estamos al final
+                }
+
+                console.log('Navegando de', data.currentIndex, 'a', newIndex, 'de', data.items.length, 'recuerdos');
+
+                // Actualizar el índice actual
+                data.currentIndex = newIndex;
+
+                // Actualizar el contenido del popup
+                var newContent = createPopupContent(marker, newIndex);
+                var popup = marker.getPopup();
+
+                // Guardar el estado abierto
+                var wasOpen = popup.isOpen();
+
+                // Actualizar contenido
+                popup.setContent(newContent);
+
+                // Asegurarnos de que el popup permanezca abierto
+                if (wasOpen && !popup.isOpen()) {
+                    popup.openOn(map);
+                }
+
+                popup.update();
+
+                // Volver a configurar los botones de navegación
+                setTimeout(function() {
+                    setupNavButtons(popup, marker);
+                }, 50);
+
+                // Prevenir la propagación de eventos
+                return false;
+            } catch (e) {
+                console.error('Error al navegar entre recuerdos:', e);
+            }
+        }
 
         // Ajustar el zoom para mostrar todos los marcadores
-        if (markers.length > 0) {
-            var group = new L.featureGroup(markers);
+        if (allMarkers.length > 0) {
+            var group = new L.featureGroup(allMarkers);
             map.fitBounds(group.getBounds().pad(0.1));
-            console.log('Zoom ajustado a los marcadores');
         }
 
         // Forzar redibujado del mapa después de cargar
         setTimeout(function() {
             map.invalidateSize();
-            console.log('Mapa redibujado');
         }, 100);
+
         @endif
     </script>
 </body>

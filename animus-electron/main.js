@@ -30,12 +30,12 @@ function createWindow() {
         responseHeaders: {
           ...details.responseHeaders,
           'Content-Security-Policy': [
-            "default-src 'self' http://localhost:* http://127.0.0.1:* data: blob:; " +
+            "default-src 'self' http://localhost:* http://127.0.0.1:* https://*.tile.openstreetmap.org data: blob:; " +
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:* http://127.0.0.1:* https://cdn.tailwindcss.com; " +
             "style-src 'self' 'unsafe-inline' http://localhost:* http://127.0.0.1:* https://fonts.googleapis.com https://cdn.tailwindcss.com; " +
             "font-src 'self' data: https://fonts.gstatic.com; " +
-            "img-src 'self' data: http://localhost:* http://127.0.0.1:* blob:; " +
-            "connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*;"
+            "img-src 'self' data: http://localhost:* http://127.0.0.1:* https://*.tile.openstreetmap.org blob:; " +
+            "connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.tile.openstreetmap.org ws://localhost:* ws://127.0.0.1:*;"
           ],
         }
       });
