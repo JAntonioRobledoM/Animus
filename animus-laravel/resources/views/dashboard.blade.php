@@ -353,14 +353,17 @@
                                             EDITAR
                                         </a>
                                     </div>
-                                    <a href="#" class="btn-hologram px-4 py-2 text-sm rounded-md transition-all duration-300 flex items-center space-x-2 launch-game hover:scale-105 font-medium shadow-md" data-path="{{ $recuerdo->path }}">
+                                    <button class="btn-hologram px-4 py-2 text-sm rounded-md transition-all duration-300 flex items-center space-x-2 launch-button hover:scale-105 font-medium shadow-md"
+                                            data-path="{{ $recuerdo->path }}"
+                                            data-recuerdo-id="{{ $recuerdo->id }}"
+                                            data-is-external="{{ $recuerdo->necesita_app_externa ? 'true' : 'false' }}">
                                         <div class="w-4 h-4 bg-gradient-to-br from-abstergo-blue to-abstergo-accent rounded-full flex items-center justify-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-2 w-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                                             </svg>
                                         </div>
                                         <span>SINCRONIZAR</span>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -493,24 +496,80 @@
             }, 50);
         }
 
+        // Función para lanzar apps externas (llamada a API de Laravel)
+        async function launchExternalApp(recuerdoId) {
+            console.log('Lanzando app externa para recuerdo:', recuerdoId);
+
+            try {
+                const response = await fetch(`/recuerdos/${recuerdoId}/lanzar-app`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    console.log('App externa iniciada correctamente');
+                } else {
+                    console.error('Error al iniciar app externa:', data.message);
+                }
+            } catch (error) {
+                console.error('Error al conectar con la API:', error);
+            }
+        }
+
         // Configurar todos los botones de sincronización y los botones de ordenar
         document.addEventListener('DOMContentLoaded', function() {
-            // Seleccionar todos los botones de sincronización
+            // Seleccionar todos los botones de lanzamiento
+            const launchButtons = document.querySelectorAll('.launch-button');
+
+            launchButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const isExternal = this.dataset.isExternal === 'true';
+                    const recuerdoId = this.dataset.recuerdoId;
+                    const gamePath = this.dataset.path;
+
+                    if (isExternal && gamePath) {
+                        // Tiene AMBAS: app externa Y juego
+                        // Primero lanzar la app externa, luego el juego
+                        console.log('Lanzando app externa y juego');
+                        launchExternalApp(recuerdoId);
+                        // Lanzar el juego después de 1 segundo (esto mostrará el modal)
+                        setTimeout(() => {
+                            launchGame(gamePath);
+                        }, 1000);
+                    } else if (isExternal) {
+                        // Solo tiene app externa - sin modal, silenciosamente
+                        console.log('Lanzando solo app externa');
+                        launchExternalApp(recuerdoId);
+                    } else if (gamePath) {
+                        // Solo tiene juego
+                        console.log('Lanzando solo juego');
+                        launchGame(gamePath);
+                    } else {
+                        console.warn('No hay ruta de juego ni app externa configurada');
+                    }
+
+                    return false;
+                });
+            });
+
+            // Mantener los antiguos botones .launch-game por compatibilidad
             const syncButtons = document.querySelectorAll('.launch-game');
-            
             syncButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
-                    // Obtener la ruta del juego del atributo data-path
                     const gamePath = this.dataset.path;
-                    
                     if (gamePath) {
                         launchGame(gamePath);
                     } else {
                         console.warn('Ruta de juego no válida o no encontrada');
                     }
-                    
                     return false;
                 });
             });

@@ -27,6 +27,7 @@
                         'pulse-blue': 'pulse-blue 2s ease-in-out infinite',
                         'glow': 'glow 2s ease-in-out infinite alternate',
                         'scan': 'scan 3s ease-in-out infinite',
+                        'spin-slow': 'spin 2s linear infinite',
                     },
                     keyframes: {
                         'pulse-blue': {
@@ -84,19 +85,42 @@
     </style>
 </head>
 <body class="bg-abstergo-dark font-rajdhani text-white flex flex-col min-h-screen">
-    <nav class="bg-black/90 border-b-2 border-abstergo-blue shadow-lg py-4 px-6">
-        <div class="flex justify-between items-center">
+    <!-- Barra de navegación superior -->
+    <nav class="bg-black/90 border-b-2 border-abstergo-blue shadow-lg shadow-abstergo-blue/20 py-4 px-6 relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent"></div>
+        <div class="flex justify-between items-center relative z-10">
             <div class="flex items-center">
-                <span class="text-3xl font-orbitron font-bold text-hologram tracking-widest">ANIMUS OS</span>
+                <div class="w-10 h-10 bg-gradient-to-br from-abstergo-blue to-abstergo-light-blue rounded-full flex items-center justify-center mr-4 animate-pulse-blue">
+                    <div class="w-6 h-6 bg-white rounded-full opacity-80"></div>
+                </div>
+                <span class="text-3xl font-orbitron font-bold text-hologram animate-glow tracking-widest">ANIMUS OS</span>
+                <div class="ml-4 text-xs text-abstergo-accent font-orbitron">v1.0</div>
             </div>
+
             <div class="flex items-center space-x-6">
-                <a href="{{ route('dashboard') }}" class="text-white hover:text-abstergo-accent transition-all">DASHBOARD</a>
-                <a href="{{ route('recuerdos.index') }}" class="text-white hover:text-abstergo-accent transition-all">RECUERDOS</a>
-                <a href="{{ route('sagas.index') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent">SAGAS</a>
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <button type="submit" class="btn-hologram text-white px-4 py-2 rounded-md">CERRAR SESIÓN</button>
-                </form>
+                <a href="{{ route('dashboard') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
+                    DASHBOARD
+                </a>
+                <a href="{{ route('sagas.index') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent px-3 py-1 font-medium tracking-wide">
+                    SAGAS
+                </a>
+                <a href="{{ route('recuerdos.index') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
+                    GESTIONAR RECUERDOS
+                </a>
+                <a href="{{ route('map.index') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
+                    MAPA DE RECUERDOS
+                </a>
+
+                <div class="flex items-center space-x-4 ml-8">
+                    <div class="text-sm text-abstergo-accent font-orbitron">USUARIO:</div>
+                    <div class="text-white font-medium">{{ auth()->user()->name }}</div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn-hologram text-white px-4 py-2 rounded-md transition-all duration-300 hover:bg-abstergo-blue/30 font-medium">
+                            CERRAR SESIÓN
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>
@@ -162,8 +186,13 @@
         @endif
     </main>
 
-    <footer class="bg-black/90 border-t-2 border-abstergo-blue py-6 px-6 text-center mt-auto">
-        <p class="text-abstergo-accent font-orbitron">ABSTERGO INDUSTRIES © {{ date('Y') }}</p>
+    <footer class="bg-black/90 border-t-2 border-abstergo-blue py-6 px-6 text-center relative mt-auto">
+        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent"></div>
+        <div class="relative z-10">
+            <p class="text-abstergo-accent font-orbitron font-medium tracking-widest">ABSTERGO INDUSTRIES © {{ date('Y') }} - ANIMUS OS v1.0</p>
+            <p class="mt-2 text-sm text-gray-400 font-rajdhani">SISTEMA DE RECUPERACIÓN DE MEMORIAS GENÉTICAS</p>
+            <div class="mt-3 w-32 h-0.5 bg-gradient-to-r from-transparent via-abstergo-blue to-transparent mx-auto"></div>
+        </div>
     </footer>
 </body>
 </html>

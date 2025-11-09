@@ -246,9 +246,50 @@ class RecuerdosController extends Controller
         }
 
         try {
-            // En Windows, usar el comando start para abrir el ejecutable
-            $command = 'start "" "' . $recuerdo->ruta_app_externa . '"';
-            pclose(popen($command, 'r'));
+            $appPath = $recuerdo->ruta_app_externa;
+
+            // Verificar extensión del archivo (permitir .url para accesos directos de Windows)
+            $extension = strtolower(pathinfo($appPath, PATHINFO_EXTENSION));
+            if (!in_array($extension, ['exe', 'bat', 'cmd', 'com', 'url', 'lnk'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tipo de archivo no permitido. Solo .exe, .bat, .cmd, .com, .url o .lnk'
+                ], 400);
+            }
+
+            // Detectar SO
+            $isWindows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+
+            if ($isWindows) {
+                // Para Windows: usar "start" para ejecutar en background
+                // Usar cmd /c para asegurar que se ejecuta correctamente
+                $command = 'cmd /c start "" "' . str_replace('"', '\"', $appPath) . '"';
+
+                // Usar proc_open para mejor manejo de procesos
+                $descriptorspec = array(
+                    0 => array("pipe", "r"),  // stdin
+                    1 => array("pipe", "w"),  // stdout
+                    2 => array("pipe", "w")   // stderr
+                );
+
+                $process = proc_open($command, $descriptorspec, $pipes);
+
+                if (is_resource($process)) {
+                    // Cerrar los pipes
+                    fclose($pipes[0]);
+                    fclose($pipes[1]);
+                    fclose($pipes[2]);
+
+                    // No esperamos a que termine el proceso (background)
+                    proc_close($process);
+                } else {
+                    throw new \Exception('No se pudo crear el proceso');
+                }
+            } else {
+                // Para Linux/Mac: usar exec en background
+                $command = 'nohup ' . escapeshellarg($appPath) . ' > /dev/null 2>&1 &';
+                exec($command);
+            }
 
             return response()->json([
                 'success' => true,

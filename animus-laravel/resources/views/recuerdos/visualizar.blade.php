@@ -403,6 +403,7 @@
             // Lanzar app externa si está configurada
             @if($recuerdo->necesita_app_externa && $recuerdo->ruta_app_externa)
                 setTimeout(() => {
+                    // Lanzar app externa después de 3 segundos
                     fetch('{{ route('recuerdos.lanzar-app', $recuerdo->id) }}', {
                         method: 'POST',
                         headers: {
@@ -412,25 +413,32 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
-                            console.log('Aplicación externa iniciada correctamente');
-                            // Opcional: mostrar mensaje al usuario
+                        const terminalElement = document.getElementById('terminal');
+                        if (terminalElement) {
                             const terminalMsg = document.createElement('p');
-                            terminalMsg.textContent = '> Aplicación externa iniciada...';
-                            terminalMsg.classList.add('text-green-500', 'animate-glow');
-                            terminal.appendChild(terminalMsg);
-                            terminal.scrollTop = terminal.scrollHeight;
-                        } else {
-                            console.error('Error al iniciar app externa:', data.message);
-                            const terminalMsg = document.createElement('p');
-                            terminalMsg.textContent = '> Error al iniciar aplicación externa: ' + data.message;
-                            terminalMsg.classList.add('text-red-500', 'animate-glow');
-                            terminal.appendChild(terminalMsg);
-                            terminal.scrollTop = terminal.scrollHeight;
+                            if (data.success) {
+                                console.log('Aplicación externa iniciada correctamente');
+                                terminalMsg.textContent = '> Aplicación externa iniciada...';
+                                terminalMsg.classList.add('text-green-500', 'animate-glow');
+                            } else {
+                                console.error('Error al iniciar app externa:', data.message);
+                                terminalMsg.textContent = '> Error: ' + data.message;
+                                terminalMsg.classList.add('text-red-500', 'animate-glow');
+                            }
+                            terminalElement.appendChild(terminalMsg);
+                            terminalElement.scrollTop = terminalElement.scrollHeight;
                         }
                     })
                     .catch(error => {
-                        console.error('Error:', error);
+                        console.error('Error al lanzar app externa:', error);
+                        const terminalElement = document.getElementById('terminal');
+                        if (terminalElement) {
+                            const terminalMsg = document.createElement('p');
+                            terminalMsg.textContent = '> Error: No se pudo conectar con la aplicación';
+                            terminalMsg.classList.add('text-red-500', 'animate-glow');
+                            terminalElement.appendChild(terminalMsg);
+                            terminalElement.scrollTop = terminalElement.scrollHeight;
+                        }
                     });
                 }, 3000); // Esperar 3 segundos después de cargar para lanzar la app
             @endif
