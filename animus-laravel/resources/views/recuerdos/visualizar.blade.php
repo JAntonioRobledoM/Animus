@@ -399,6 +399,41 @@
             }
             
             setTimeout(updateSync, 2000);
+
+            // Lanzar app externa si está configurada
+            @if($recuerdo->necesita_app_externa && $recuerdo->ruta_app_externa)
+                setTimeout(() => {
+                    fetch('{{ route('recuerdos.lanzar-app', $recuerdo->id) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Aplicación externa iniciada correctamente');
+                            // Opcional: mostrar mensaje al usuario
+                            const terminalMsg = document.createElement('p');
+                            terminalMsg.textContent = '> Aplicación externa iniciada...';
+                            terminalMsg.classList.add('text-green-500', 'animate-glow');
+                            terminal.appendChild(terminalMsg);
+                            terminal.scrollTop = terminal.scrollHeight;
+                        } else {
+                            console.error('Error al iniciar app externa:', data.message);
+                            const terminalMsg = document.createElement('p');
+                            terminalMsg.textContent = '> Error al iniciar aplicación externa: ' + data.message;
+                            terminalMsg.classList.add('text-red-500', 'animate-glow');
+                            terminal.appendChild(terminalMsg);
+                            terminal.scrollTop = terminal.scrollHeight;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                }, 3000); // Esperar 3 segundos después de cargar para lanzar la app
+            @endif
         });
     </script>
 </body>

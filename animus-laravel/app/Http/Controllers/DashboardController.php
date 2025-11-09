@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Recuerdo;
+use App\Models\Saga;
 use Illuminate\Routing\Controller;
 
 class DashboardController extends Controller
@@ -22,9 +23,10 @@ class DashboardController extends Controller
      */
     public function index(Request $request)
     {
-        // Obtener parámetros de ordenación
+        // Obtener parámetros de ordenación y filtro
         $sort = $request->query('sort', 'position');
         $direction = $request->query('direction', 'asc');
+        $sagaId = $request->query('saga_id', null);
         $validSorts = ['position', 'year'];
         $validDirections = ['asc', 'desc'];
 
@@ -37,10 +39,22 @@ class DashboardController extends Controller
         }
 
         // Obtener solo los recuerdos del usuario autenticado, ordenados según los parámetros
-        $recuerdos = Auth::user()->recuerdos()->orderBy($sort, $direction)->get();
-        
+        $query = Auth::user()->recuerdos();
+
+        // Filtrar por saga si se proporciona
+        if ($sagaId) {
+            $query = $query->where('saga_id', $sagaId);
+        }
+
+        $recuerdos = $query->orderBy($sort, $direction)->get();
+
+        // Obtener todas las sagas del usuario
+        $sagas = Auth::user()->sagas()->orderBy('posicion')->get();
+
         return view('dashboard', [
-            'recuerdos' => $recuerdos
+            'recuerdos' => $recuerdos,
+            'sagas' => $sagas,
+            'sagaId' => $sagaId
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recuerdo;
+use App\Models\Saga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -33,7 +34,8 @@ class RecuerdosController extends Controller
      */
     public function create()
     {
-        return view('recuerdos.create');
+        $sagas = Auth::user()->sagas()->orderBy('posicion')->get();
+        return view('recuerdos.create', compact('sagas'));
     }
 
     /**
@@ -45,9 +47,12 @@ class RecuerdosController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'position' => 'nullable|integer',
+            'saga_id' => 'nullable|integer|exists:sagas,id',
             'path' => 'nullable|string|max:255',
             'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'lugar' => 'nullable|string|max:255',
+            'necesita_app_externa' => 'nullable|boolean',
+            'ruta_app_externa' => 'nullable|string|max:500',
         ]);
 
         $data = $request->except('img');
@@ -107,7 +112,8 @@ class RecuerdosController extends Controller
         // Verificar que el recuerdo pertenece al usuario actual
         $this->checkOwnership($recuerdo);
 
-        return view('recuerdos.edit', compact('recuerdo'));
+        $sagas = Auth::user()->sagas()->orderBy('posicion')->get();
+        return view('recuerdos.edit', compact('recuerdo', 'sagas'));
     }
 
     /**
@@ -122,9 +128,12 @@ class RecuerdosController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'position' => 'nullable|integer',
+            'saga_id' => 'nullable|integer|exists:sagas,id',
             'path' => 'nullable|string|max:255',
             'img' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'lugar' => 'nullable|string|max:255',
+            'necesita_app_externa' => 'nullable|boolean',
+            'ruta_app_externa' => 'nullable|string|max:500',
         ]);
 
         $data = $request->except(['img', '_token', '_method']);
@@ -211,6 +220,46 @@ class RecuerdosController extends Controller
             ->firstOrFail();
 
         return view('recuerdos.visualizar', compact('recuerdo'));
+    }
+
+    /**
+     * Lanza una aplicación externa
+     */
+    public function lanzarAppExterna(Recuerdo $recuerdo)
+    {
+        // Verificar que el recuerdo pertenece al usuario actual
+        $this->checkOwnership($recuerdo);
+
+        if (!$recuerdo->necesita_app_externa || empty($recuerdo->ruta_app_externa)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este recuerdo no tiene una app externa configurada.'
+            ], 400);
+        }
+
+        // Verificar que el archivo existe
+        if (!file_exists($recuerdo->ruta_app_externa)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró la aplicación en la ruta especificada.'
+            ], 404);
+        }
+
+        try {
+            // En Windows, usar el comando start para abrir el ejecutable
+            $command = 'start "" "' . $recuerdo->ruta_app_externa . '"';
+            pclose(popen($command, 'r'));
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Aplicación externa iniciada correctamente.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al iniciar la aplicación: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

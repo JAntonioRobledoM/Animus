@@ -47,4 +47,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Recuerdo::class);
     }
+
+    /**
+     * Obtiene las sagas que pertenecen a este usuario.
+     */
+    public function sagas(): HasMany
+    {
+        return $this->hasMany(Saga::class);
+    }
 }

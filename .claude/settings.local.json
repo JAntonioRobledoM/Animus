@@ -6,7 +6,11 @@
       "Bash(findstr:*)",
       "Bash(php:*)",
       "Bash(del \"c:\\Users\\janto\\Desktop\\VSC\\Animus\\animus-laravel\\check_recuerdos.php\")",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(dir:*)",
+      "Bash(tree:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

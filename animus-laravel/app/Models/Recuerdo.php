@@ -17,6 +17,7 @@ class Recuerdo extends Model
      */
     protected $fillable = [
         'user_id',
+        'saga_id',
         'img',
         'title',
         'subtitle',
@@ -26,13 +27,23 @@ class Recuerdo extends Model
         'lugar',
         'latitud',
         'longitud',
+        'necesita_app_externa',
+        'ruta_app_externa',
     ];
-    
+
     /**
      * Obtiene el usuario al que pertenece este recuerdo.
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Obtiene la saga a la que pertenece este recuerdo.
+     */
+    public function saga(): BelongsTo
+    {
+        return $this->belongsTo(Saga::class);
     }
 }

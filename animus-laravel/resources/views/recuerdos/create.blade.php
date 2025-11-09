@@ -248,6 +248,18 @@
                             <p class="text-xs text-gray-400 mt-1 font-rajdhani">Año asociado al recuerdo (opcional).</p>
                         </div>
                         <div class="mb-6">
+                            <label for="saga_id" class="block text-abstergo-accent mb-2 font-orbitron">SAGA</label>
+                            <select name="saga_id" id="saga_id" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50">
+                                <option value="">-- Seleccionar saga (opcional) --</option>
+                                @foreach ($sagas as $saga)
+                                    <option value="{{ $saga->id }}" {{ old('saga_id') == $saga->id ? 'selected' : '' }}>
+                                        {{ $saga->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1 font-rajdhani">Asigna este recuerdo a una saga existente.</p>
+                        </div>
+                        <div class="mb-6">
                             <label for="lugar" class="block text-abstergo-accent mb-2 font-orbitron">LUGAR</label>
                             <input type="text" name="lugar" id="lugar" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('lugar') }}" placeholder="Madrid, España">
                             <p class="text-xs text-gray-400 mt-1 font-rajdhani">Ciudad, país o región del recuerdo. Las coordenadas se calcularán automáticamente.</p>
@@ -261,6 +273,17 @@
                             <label for="path" class="block text-abstergo-accent mb-2 font-orbitron">RUTA DEL EJECUTABLE (.exe)</label>
                             <input type="text" name="path" id="path" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('path') }}" placeholder="C:\Juegos\AssassinsCreed\AC.exe">
                             <p class="text-xs text-gray-400 mt-1 font-rajdhani">Ruta completa al ejecutable del juego. Ejemplo: C:\Juegos\AssassinsCreed\AC.exe</p>
+                        </div>
+                        <div class="mb-6">
+                            <div class="flex items-center mb-3">
+                                <input type="checkbox" name="necesita_app_externa" id="necesita_app_externa" value="1" class="w-4 h-4 bg-abstergo-dark/70 border border-abstergo-blue/40 rounded focus:ring-2 focus:ring-abstergo-blue/50 text-abstergo-blue" {{ old('necesita_app_externa') ? 'checked' : '' }}>
+                                <label for="necesita_app_externa" class="ml-2 text-abstergo-accent font-orbitron">NECESITA APP EXTERNA</label>
+                            </div>
+                            <div id="ruta_app_container" class="hidden">
+                                <label for="ruta_app_externa" class="block text-abstergo-accent mb-2 font-orbitron">RUTA DE APP EXTERNA</label>
+                                <input type="text" name="ruta_app_externa" id="ruta_app_externa" class="w-full bg-abstergo-dark/70 border border-abstergo-blue/40 rounded py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-abstergo-blue/50" value="{{ old('ruta_app_externa') }}" placeholder="C:\Apps\MiApp\app.exe">
+                                <p class="text-xs text-gray-400 mt-1 font-rajdhani">Ruta completa a la aplicación externa que se abrirá junto con este recuerdo.</p>
+                            </div>
                         </div>
                     </div>
                     <div>
@@ -314,6 +337,21 @@
                 preview.innerHTML = '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/10 to-transparent animate-pulse"></div><span class="text-gray-400 font-rajdhani relative z-10">No se ha seleccionado ninguna imagen</span>';
             }
         });
+
+        // Control de visibilidad para app externa
+        document.getElementById('necesita_app_externa').addEventListener('change', function() {
+            const container = document.getElementById('ruta_app_container');
+            if (this.checked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        });
+
+        // Verificar estado inicial del checkbox al cargar la página
+        if (document.getElementById('necesita_app_externa').checked) {
+            document.getElementById('ruta_app_container').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>

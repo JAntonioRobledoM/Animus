@@ -178,6 +178,9 @@
                 <a href="{{ route('dashboard') }}" class="text-abstergo-accent border-b-2 border-abstergo-accent px-3 py-1 font-medium tracking-wide">
                     DASHBOARD
                 </a>
+                <a href="{{ route('sagas.index') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
+                    SAGAS
+                </a>
                 <a href="{{ route('recuerdos.index') }}" class="text-white hover:text-abstergo-accent transition-all duration-300 px-3 py-1 hover:bg-abstergo-accent/10 rounded">
                     GESTIONAR RECUERDOS
                 </a>
@@ -265,7 +268,21 @@
         <!-- Sistema de recuerdos -->
         <section class="mb-10">
             <h2 class="text-2xl font-orbitron font-semibold mb-8 text-abstergo-accent">RECUERDOS DISPONIBLES</h2>
-            
+
+            <!-- Filtro de Sagas -->
+            @if($sagas->isNotEmpty())
+                <div class="mb-8 flex gap-4 flex-wrap">
+                    <a href="{{ route('dashboard') }}" class="btn-hologram text-white px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 font-medium text-sm {{ !$sagaId ? 'ring-2 ring-abstergo-accent' : '' }}">
+                        TODAS LAS SAGAS
+                    </a>
+                    @foreach($sagas as $saga)
+                        <a href="{{ route('dashboard', ['saga_id' => $saga->id]) }}" class="px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 font-medium text-sm border-2" style="border-color: {{ $saga->color }}; {{ $sagaId == $saga->id ? 'background-color: ' . $saga->color . '30;' : '' }}">
+                            {{ $saga->nombre }}
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+
             @if($recuerdos->isEmpty())
                 <div class="hologram-border bg-gradient-to-br from-abstergo-blue/10 to-abstergo-accent/10 rounded-xl p-12 text-center relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-abstergo-blue/5 to-transparent animate-pulse"></div>
